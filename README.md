@@ -1,11 +1,14 @@
 <div align="center">
 <p align="center">
-<img src="https://cdn.jsdelivr.net/gh/ModulationAI/agentflowbus/assets/logo.png?raw=true" width="700" height="350" alt="agentflowbus preview">
+<img src="https://cdn.jsdelivr.net/gh/ModulationAI/agentflowbus/assets/logo.png?v=2&raw=true" width="700" height="350" alt="agentflowbus preview">
 
+<h3 align="center">
+AgentFlowBus
+</h3>
+<h5 align="center">
+A protocol & runtime for agent-to-agent communication
+</h5>
 </div>
-
-
-# AgentFlowBus
 
 AgentFlowBus is a lightweight communication runtime for AI agents. It provides an ACP-compatible event envelope, streaming-first request/reply APIs, session and trace propagation, and pluggable transports such as in-memory and NATS Core.
 
