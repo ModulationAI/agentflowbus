@@ -1,6 +1,6 @@
 <div align="center">
 <p align="center">
-<img src="https://cdn.jsdelivr.net/gh/ModulationAI/openagentio/assets/open_agentio_logo.png?v=3&raw=true" width="700" height="350" alt="openagentio preview">
+<img src="https://cdn.jsdelivr.net/gh/ModulationAI/OpenAgentIO/assets/open_agentio_logo.png?raw=true" width="700" height="350" alt="openagentio preview">
 
 <h3 align="center">
 OpenAgentIO
