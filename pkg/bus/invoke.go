@@ -3,6 +3,7 @@ package bus
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/ModulationAI/openagentio/pkg/event"
 	"github.com/ModulationAI/openagentio/pkg/middleware"
@@ -181,6 +182,8 @@ func (b *defaultBus) errorResponse(req *event.Envelope, srcErr error) *event.Env
 
 // newReplyShell pre-populates a response envelope with correlation metadata
 // copied from req, leaving Payload/IsFinal for the caller to fill in.
+// Non-acp metadata keys are inherited so business context (e.g. dingtalk.*)
+// flows back through cascading invocations without manual copying.
 func newReplyShell(agentID string, req *event.Envelope, eventType string) *event.Envelope {
 	resp := event.New(eventType)
 	resp.From = agentID
@@ -194,12 +197,32 @@ func newReplyShell(agentID string, req *event.Envelope, eventType string) *event
 	resp.SpanID = req.SpanID
 	resp.Traceparent = req.Traceparent
 	resp.CorrelationID = req.EventID
+	resp.Metadata = inheritMetadata(req.Metadata)
 	return resp
+}
+
+// inheritMetadata copies metadata while filtering out runtime-internal keys
+// prefixed with "acp." (e.g. acp.retry.attempt, acp.dlq.last_error).
+func inheritMetadata(src map[string]any) map[string]any {
+	if src == nil {
+		return nil
+	}
+	dst := make(map[string]any, len(src))
+	for k, v := range src {
+		if !strings.HasPrefix(k, "acp.") {
+			dst[k] = v
+		}
+	}
+	if len(dst) == 0 {
+		return nil
+	}
+	return dst
 }
 
 // adoptResponse merges fields from the user-supplied response envelope with
 // correlation metadata from the request, preferring the user's values when
-// they are explicitly set.
+// they are explicitly set. If the user envelope carries no metadata,
+// non-acp keys from the request are inherited.
 func adoptResponse(agentID string, req, user *event.Envelope) *event.Envelope {
 	resp := user.Clone()
 	if resp.From == "" {
@@ -228,6 +251,9 @@ func adoptResponse(agentID string, req, user *event.Envelope) *event.Envelope {
 	}
 	if !resp.IsFinal && event.IsTerminal(resp.EventType) {
 		resp.IsFinal = true
+	}
+	if resp.Metadata == nil {
+		resp.Metadata = inheritMetadata(req.Metadata)
 	}
 	return resp
 }

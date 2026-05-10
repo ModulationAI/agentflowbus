@@ -207,8 +207,19 @@ class Stream:
             pass
 
 
+def _inherit_metadata(src: dict[str, Any] | None) -> dict[str, Any] | None:
+    if src is None:
+        return None
+    dst = {k: v for k, v in src.items() if not k.startswith("acp.")}
+    return dst if dst else None
+
+
 def new_reply_shell(agent_id: str, req: Envelope, event_type: str) -> Envelope:
-    """Pre-populate a response envelope with correlation metadata copied from req."""
+    """Pre-populate a response envelope with correlation metadata copied from req.
+
+    Non-acp metadata keys are inherited so business context (e.g. dingtalk.*)
+    flows back through cascading invocations without manual copying.
+    """
     resp = Envelope.new(event_type)
     resp.from_ = agent_id
     resp.to = req.from_
@@ -221,4 +232,5 @@ def new_reply_shell(agent_id: str, req: Envelope, event_type: str) -> Envelope:
     resp.span_id = req.span_id
     resp.traceparent = req.traceparent
     resp.correlation_id = req.event_id
+    resp.metadata = _inherit_metadata(req.metadata)
     return resp

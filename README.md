@@ -173,6 +173,8 @@ func main() {
 
 Every message is carried in an `event.Envelope`. The envelope stores protocol version, event type, IDs, trace/session metadata, tenant information, reply routing, sequence numbers, and an opaque JSON payload.
 
+**Metadata inheritance** — When the bus builds a response envelope, it automatically copies non-`acp.*` metadata keys from the request. This means business context such as `dingtalk.conversation_token` or `channel.source_message_id` flows back through cascading invocations (gateway → main-agent → sub-agent) without manual copying. Keys prefixed with `acp.*` (e.g. `acp.retry.attempt`, `acp.dlq.last_error`) are runtime internals and are filtered out.
+
 ### Subject Routing
 
 OpenAgentIO separates event semantics from transport routing.
