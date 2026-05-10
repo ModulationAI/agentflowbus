@@ -375,6 +375,8 @@ class Bus:
         return resp
 
     def _adopt_response(self, req: Envelope, user: Envelope) -> Envelope:
+        from openagentio.bus.stream import _inherit_metadata
+
         resp = user.clone()
         if not resp.from_:
             resp.from_ = self._agent_id
@@ -394,4 +396,6 @@ class Bus:
             resp.traceparent = req.traceparent
         if not resp.is_final and is_terminal(resp.event_type):
             resp.is_final = True
+        if resp.metadata is None:
+            resp.metadata = _inherit_metadata(req.metadata)
         return resp
